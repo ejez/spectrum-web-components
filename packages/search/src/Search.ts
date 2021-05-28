@@ -86,6 +86,7 @@ export class Search extends Textfield {
                 bubbles: true,
             })
         );
+        this.focus();
     }
 
     protected render(): TemplateResult {
@@ -106,7 +107,7 @@ export class Search extends Textfield {
                     ? html`
                           <sp-clear-button
                               id="button"
-                              label="Reset"
+                              label="Clear search"
                               tabindex="-1"
                               type="reset"
                               @keydown=${stopPropagation}
