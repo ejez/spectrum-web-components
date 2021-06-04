@@ -53,6 +53,7 @@ type FragmentName = Color | Scale | 'core';
 export interface ThemeData {
     color?: Color;
     scale?: Scale;
+    lang?: string;
 }
 
 type ThemeKindProvider = {
@@ -198,6 +199,8 @@ export class Theme extends HTMLElement implements ThemeKindProvider {
         const { detail: theme } = event;
         theme.color = this.color || undefined;
         theme.scale = this.scale || undefined;
+        theme.lang =
+            this.lang || document.documentElement.lang || navigator.language;
     }
 
     protected connectedCallback(): void {
@@ -231,7 +234,7 @@ export class Theme extends HTMLElement implements ThemeKindProvider {
                 !(dirParent instanceof Theme)
             ) {
                 dirParent = ((dirParent as HTMLElement).assignedSlot || // step into the shadow DOM of the parent of a slotted node
-                dirParent.parentNode || // DOM Element detected
+                    dirParent.parentNode || // DOM Element detected
                     (dirParent as ShadowRoot).host) as
                     | HTMLElement
                     | DocumentFragment
