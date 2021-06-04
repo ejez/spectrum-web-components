@@ -67,7 +67,7 @@ export class NumberField extends TextfieldBase {
 
     /**
      * An `<sp-number-field>` element will process its numeric value with
-     * `new Intl.NumberFormat(navigator.language, this.formatOptions).format(this.valueAsNumber)`
+     * `new Intl.NumberFormat(this.lang, this.formatOptions).format(this.valueAsNumber)`
      * in order to prepare it for visual delivery in the input. In order to customize this
      * processing supply your own `Intl.NumberFormatOptions` object here.
      *
@@ -124,24 +124,20 @@ export class NumberField extends TextfieldBase {
     }
 
     public set valueAsString(value: string) {
-        this.value = new NumberParser(
-            navigator.language,
-            this.formatOptions
-        ).parse(value);
+        this.value = new NumberParser(this.lang, this.formatOptions).parse(
+            value
+        );
     }
 
     public get formattedValue(): string {
         if (isNaN(this.value)) return '';
-        return new NumberFormatter(
-            navigator.language,
-            this.formatOptions
-        ).format(this.value);
+        return new NumberFormatter(this.lang, this.formatOptions).format(
+            this.value
+        );
     }
 
     private convertValueToNumber(value: string): number {
-        return new NumberParser(navigator.language, this.formatOptions).parse(
-            value
-        );
+        return new NumberParser(this.lang, this.formatOptions).parse(value);
     }
 
     private get _step(): number {
@@ -427,10 +423,9 @@ export class NumberField extends TextfieldBase {
             changes.has('min') ||
             changes.has('min')
         ) {
-            const value = new NumberParser(
-                navigator.language,
-                this.formatOptions
-            ).parse(this.inputElement.value);
+            const value = new NumberParser(this.lang, this.formatOptions).parse(
+                this.inputElement.value
+            );
             this.value = this.validateInput(value);
         }
         if (changes.has('min') || changes.has('formatOptions')) {

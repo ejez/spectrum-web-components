@@ -12,8 +12,8 @@ governing permissions and limitations under the License.
 
 import { LitElement, property, UpdatingElement } from 'lit-element';
 type ThemeRoot = HTMLElement & {
-    startManagingContentDirection: (el: HTMLElement) => void;
-    stopManagingContentDirection: (el: HTMLElement) => void;
+    startManagingDescendent: (el: HTMLElement) => void;
+    stopManagingDescendent: (el: HTMLElement) => void;
 };
 
 type Constructor<T = Record<string, unknown>> = {
@@ -30,29 +30,31 @@ export interface SpectrumInterface {
 
 const observedForElements: Set<HTMLElement> = new Set();
 
-const updateRTL = (): void => {
+const updateFromScopeRoot = (): void => {
     const dir =
         document.documentElement.dir === 'rtl'
             ? document.documentElement.dir
             : 'ltr';
+    const lang = document.documentElement.lang || navigator.language;
     observedForElements.forEach((el) => {
         el.setAttribute('dir', dir);
+        el.setAttribute('lang', lang);
     });
 };
 
-const rtlObserver = new MutationObserver(updateRTL);
+const rtlObserver = new MutationObserver(updateFromScopeRoot);
 
 rtlObserver.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['dir'],
+    attributeFilter: ['dir', 'lang'],
 });
 
 type ContentDirectionManager = HTMLElement & {
-    startManagingContentDirection?(): void;
+    startManagingDescendent?(): void;
 };
 
 const canManageContentDirection = (el: ContentDirectionManager): boolean =>
-    typeof el.startManagingContentDirection !== 'undefined' ||
+    typeof el.startManagingDescendent !== 'undefined' ||
     el.tagName === 'SP-THEME';
 
 export function SpectrumMixin<T extends Constructor<UpdatingElement>>(
@@ -63,7 +65,7 @@ export function SpectrumMixin<T extends Constructor<UpdatingElement>>(
          * @private
          */
         public shadowRoot!: ShadowRoot;
-        private _dirParent?: HTMLElement;
+        private _scopeRoot?: HTMLElement;
 
         /**
          * @private
@@ -74,62 +76,69 @@ export function SpectrumMixin<T extends Constructor<UpdatingElement>>(
         /**
          * @private
          */
+        @property({ reflect: true })
+        public lang = '';
+
+        /**
+         * @private
+         */
         public get isLTR(): boolean {
             return this.dir === 'ltr';
         }
 
         public connectedCallback(): void {
             if (!this.hasAttribute('dir')) {
-                let dirParent = ((this as HTMLElement).assignedSlot ||
+                let scopeRoot = ((this as HTMLElement).assignedSlot ||
                     this.parentNode) as HTMLElement;
                 while (
-                    dirParent !== document.documentElement &&
+                    scopeRoot !== document.documentElement &&
                     !canManageContentDirection(
-                        dirParent as ContentDirectionManager
+                        scopeRoot as ContentDirectionManager
                     )
                 ) {
-                    dirParent = ((dirParent as HTMLElement).assignedSlot || // step into the shadow DOM of the parent of a slotted node
-                        dirParent.parentNode || // DOM Element detected
-                        ((dirParent as unknown) as ShadowRoot)
+                    scopeRoot = ((scopeRoot as HTMLElement).assignedSlot || // step into the shadow DOM of the parent of a slotted node
+                        scopeRoot.parentNode || // DOM Element detected
+                        ((scopeRoot as unknown) as ShadowRoot)
                             .host) as HTMLElement;
                 }
                 this.dir =
-                    dirParent.dir === 'rtl' ? dirParent.dir : this.dir || 'ltr';
-                if (dirParent === document.documentElement) {
+                    scopeRoot.dir === 'rtl' ? scopeRoot.dir : this.dir || 'ltr';
+                this.lang =
+                    scopeRoot.lang ||
+                    document.documentElement.lang ||
+                    navigator.language;
+                if (scopeRoot === document.documentElement) {
                     observedForElements.add(this);
                 } else {
-                    const { localName } = dirParent;
+                    const { localName } = scopeRoot;
                     if (
                         localName.search('-') > -1 &&
                         !customElements.get(localName)
                     ) {
                         customElements.whenDefined(localName).then(() => {
-                            (dirParent as ThemeRoot).startManagingContentDirection(
+                            (scopeRoot as ThemeRoot).startManagingDescendent(
                                 this
                             );
                         });
                     } else {
-                        (dirParent as ThemeRoot).startManagingContentDirection(
-                            this
-                        );
+                        (scopeRoot as ThemeRoot).startManagingDescendent(this);
                     }
                 }
-                this._dirParent = dirParent as HTMLElement;
+                this._scopeRoot = scopeRoot as HTMLElement;
             }
             super.connectedCallback();
         }
 
         public disconnectedCallback(): void {
             super.disconnectedCallback();
-            if (this._dirParent) {
-                if (this._dirParent === document.documentElement) {
+            if (this._scopeRoot) {
+                if (this._scopeRoot === document.documentElement) {
                     observedForElements.delete(this);
                 } else {
-                    (this._dirParent as ThemeRoot).stopManagingContentDirection(
-                        this
-                    );
+                    (this._scopeRoot as ThemeRoot).stopManagingDescendent(this);
                 }
                 this.removeAttribute('dir');
+                this.removeAttribute('lang');
             }
         }
     }

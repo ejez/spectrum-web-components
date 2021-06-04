@@ -214,6 +214,12 @@ export class Theme extends HTMLElement implements ThemeKindProvider {
             const { dir } = this;
             this.trackedChildren.forEach((el) => {
                 el.setAttribute('dir', dir === 'rtl' ? dir : 'ltr');
+                el.setAttribute(
+                    'lang',
+                    this.lang ||
+                        document.documentElement.lang ||
+                        navigator.language
+                );
             });
         };
         if (!this.observer) {
@@ -221,7 +227,7 @@ export class Theme extends HTMLElement implements ThemeKindProvider {
         }
         this.observer.observe(this, {
             attributes: true,
-            attributeFilter: ['dir'],
+            attributeFilter: ['dir', 'lang'],
         });
         if (!this.hasAttribute('dir')) {
             let dirParent = ((this as HTMLElement).assignedSlot ||
@@ -231,13 +237,17 @@ export class Theme extends HTMLElement implements ThemeKindProvider {
                 !(dirParent instanceof Theme)
             ) {
                 dirParent = ((dirParent as HTMLElement).assignedSlot || // step into the shadow DOM of the parent of a slotted node
-                dirParent.parentNode || // DOM Element detected
+                    dirParent.parentNode || // DOM Element detected
                     (dirParent as ShadowRoot).host) as
                     | HTMLElement
                     | DocumentFragment
                     | ShadowRoot;
             }
             this.dir = dirParent.dir === 'rtl' ? dirParent.dir : 'ltr';
+            this.lang =
+                this.lang ||
+                document.documentElement.lang ||
+                navigator.language;
         }
         requestAnimationFrame(() => manageDir());
     }
@@ -250,11 +260,11 @@ export class Theme extends HTMLElement implements ThemeKindProvider {
 
     private observer!: MutationObserver;
 
-    public startManagingContentDirection(el: HTMLElement): void {
+    public startManagingDescendent(el: HTMLElement): void {
         this.trackedChildren.add(el);
     }
 
-    public stopManagingContentDirection(el: HTMLElement): void {
+    public stopManagingDescendent(el: HTMLElement): void {
         this.trackedChildren.delete(el);
     }
 
