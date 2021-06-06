@@ -33,6 +33,9 @@ export class RadioGroup extends FieldGroup {
     @queryAssignedNodes('')
     public defaultNodes!: Node[];
 
+    @property()
+    public label = '';
+
     public get buttons(): Radio[] {
         return this.defaultNodes.filter(
             (node) => (node as HTMLElement) instanceof Radio
@@ -206,6 +209,7 @@ export class RadioGroup extends FieldGroup {
 
     protected firstUpdated(changes: PropertyValues<this>): void {
         super.firstUpdated(changes);
+        this.setAttribute('role', 'radiogroup');
         const checkedRadio = this.querySelector('sp-radio[checked]') as Radio;
         const checkedRadioValue = checkedRadio ? checkedRadio.value : '';
         // Prefer the checked item over the selected value
@@ -246,6 +250,13 @@ export class RadioGroup extends FieldGroup {
         super.updated(changes);
         if (changes.has('selected')) {
             this.validateRadios();
+        }
+        if (changes.has('label')) {
+            if (this.label) {
+                this.setAttribute('aria-label', this.label);
+            } else {
+                this.removeAttribute('aria-label');
+            }
         }
     }
 

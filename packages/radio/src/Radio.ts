@@ -17,10 +17,10 @@ import {
     CSSResultArray,
     TemplateResult,
     PropertyValues,
+    SpectrumElement,
 } from '@spectrum-web-components/base';
 
 import radioStyles from './radio.css.js';
-import { Focusable } from '@spectrum-web-components/shared/src/focusable.js';
 
 /**
  * Spectrum Radio Button Component
@@ -29,23 +29,30 @@ import { Focusable } from '@spectrum-web-components/shared/src/focusable.js';
  * @attr invalid - Uses the invalid style
  * @attr disabled - Uses the disabled style
  * @attr checked - Represents when the input is checked
- * @attr name - Represents the group this radio is a part of
  * @attr value - Identifies this radio button within its radio group
  *
  * @event sp-radio:change - When the input is interacted with and its state is changed
  */
-export class Radio extends Focusable {
+export class Radio extends SpectrumElement {
     public static get styles(): CSSResultArray {
         return [radioStyles];
     }
-    @property({ type: String, reflect: true })
-    public name = '';
+
+    /**
+     * When this control is rendered, focus it automatically
+     * @private
+     */
+    @property({ type: Boolean })
+    public autofocus = false;
 
     @property({ type: String, reflect: true })
     public value = '';
 
     @property({ type: Boolean, reflect: true })
     public checked = false;
+
+    @property({ type: Boolean, reflect: true })
+    public disabled = false;
 
     @property({ type: Boolean, reflect: true })
     public emphasized = false;
@@ -59,8 +66,27 @@ export class Radio extends Focusable {
     @query('#input')
     private inputElement!: HTMLInputElement;
 
-    public get focusElement(): HTMLElement {
-        return this.inputElement;
+    public click(): void {
+        if (this.disabled) {
+            return;
+        }
+        this.inputElement.click();
+    }
+
+    protected manageAutoFocus(): void {
+        if (this.autofocus) {
+            /**
+             * Trick :focus-visible polyfill into thinking keyboard based focus
+             *
+             * @private
+             **/
+            this.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    code: 'Tab',
+                })
+            );
+            this.focus();
+        }
     }
 
     public handleChange(event: Event): void {
@@ -77,25 +103,42 @@ export class Radio extends Focusable {
         return html`
             <input
                 id="input"
-                aria-labelledby="label"
                 type="radio"
-                name=${this.name}
                 value=${this.value}
                 .checked=${this.checked}
                 @change=${this.handleChange}
+                aria-hidden="true"
+                tabindex="-1"
+                ?disabled=${this.disabled}
             />
             <span id="button"></span>
-            <label id="label"><slot></slot></label>
+            <span id="label" role="presentation"><slot></slot></span>
         `;
+    }
+
+    protected firstUpdated(changes: PropertyValues): void {
+        super.firstUpdated(changes);
+        this.setAttribute('role', 'radio');
+        if (!this.hasAttribute('tabindex')) {
+            this.tabIndex = 0;
+        }
+        this.manageAutoFocus();
     }
 
     protected updated(changes: PropertyValues): void {
         super.updated(changes);
         if (changes.has('invalid')) {
             if (this.invalid) {
-                this.inputElement.setAttribute('aria-invalid', 'true');
+                this.setAttribute('aria-invalid', 'true');
             } else {
-                this.inputElement.removeAttribute('aria-invalid');
+                this.removeAttribute('aria-invalid');
+            }
+        }
+        if (changes.has('checked')) {
+            if (this.checked) {
+                this.setAttribute('aria-checked', 'true');
+            } else {
+                this.setAttribute('aria-checked', 'false');
             }
         }
     }

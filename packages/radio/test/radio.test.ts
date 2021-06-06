@@ -21,12 +21,6 @@ import {
     waitUntil,
 } from '@open-wc/testing';
 
-function inputForRadio(radio: Radio): HTMLInputElement {
-    if (!radio.shadowRoot) throw new Error('No shadowRoot');
-
-    return radio.shadowRoot.querySelector('#input') as HTMLInputElement;
-}
-
 function labelNodeForRadio(radio: Radio): Node {
     if (!radio.shadowRoot) throw new Error('No shadowRoot');
     const slotEl = radio.shadowRoot.querySelector('slot') as HTMLSlotElement;
@@ -84,7 +78,7 @@ describe('Radio', () => {
         expect(value).to.equal('');
         expect(checked).to.be.false;
 
-        inputForRadio(el).click();
+        el.click();
         await elementUpdated(el);
 
         expect(el.checked).to.be.true;
@@ -113,7 +107,7 @@ describe('Radio', () => {
 
         expect(el.checked).to.be.false;
 
-        inputForRadio(el).click();
+        el.click();
         await elementUpdated(el);
 
         expect(el.checked).to.be.false;
@@ -125,7 +119,7 @@ describe('Radio', () => {
         `);
         expect(el.checked).to.be.true;
 
-        el.focusElement.click();
+        el.click();
         await elementUpdated(el);
 
         expect(el.checked).to.be.true;
