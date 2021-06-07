@@ -1,0 +1,13 @@
+diff --git a/node_modules/@web/test-runner-junit-reporter/dist/junitReporter.js b/node_modules/@web/test-runner-junit-reporter/dist/junitReporter.js
+index a7e45a1..8262fe4 100644
+--- a/node_modules/@web/test-runner-junit-reporter/dist/junitReporter.js
++++ b/node_modules/@web/test-runner-junit-reporter/dist/junitReporter.js
+@@ -58,7 +58,7 @@ const getTestDurationInSeconds = ({ duration }) => (typeof duration === 'undefin
+ const INVALID_CHARACTERS_REGEX = 
+ // eslint-disable-next-line no-control-regex
+ /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007f-\u0084\u0086-\u009f\uD800-\uDFFF\uFDD0-\uFDFF\uFFFF\uC008]/g;
+-const stripXMLInvalidChars = (x) => x.replace(INVALID_CHARACTERS_REGEX, '');
++const stripXMLInvalidChars = (x) => x ? x.replace(INVALID_CHARACTERS_REGEX, '') : x;
+ /**
+  * Makes a `<failure>` element
+  */
