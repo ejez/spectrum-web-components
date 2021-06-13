@@ -161,7 +161,7 @@ describe('NumberField', () => {
             expect(el.formattedValue).to.equal('0');
             expect(el.valueAsString).to.equal('0');
             expect(el.value).to.equal(0);
-            el.dispatchEvent(new WheelEvent('wheel', { deltaY: 1 }));
+            el.dispatchEvent(new WheelEvent('wheel', { deltaY: 100 }));
             await elementUpdated(el);
             expect(el.formattedValue).to.equal('1');
             expect(el.valueAsString).to.equal('1');
@@ -215,7 +215,7 @@ describe('NumberField', () => {
             expect(el.formattedValue).to.equal('0');
             expect(el.valueAsString).to.equal('0');
             expect(el.value).to.equal(0);
-            el.dispatchEvent(new WheelEvent('wheel', { deltaY: -1 }));
+            el.dispatchEvent(new WheelEvent('wheel', { deltaY: -100 }));
             await elementUpdated(el);
             expect(el.formattedValue).to.equal('-1');
             expect(el.valueAsString).to.equal('-1');
