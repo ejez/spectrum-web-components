@@ -23,6 +23,7 @@ import { ActionButton } from '@spectrum-web-components/action-button';
 
 import menuItemStyles from './menu-item.css.js';
 import checkmarkStyles from '@spectrum-web-components/icon/src/spectrum-icon-checkmark.css.js';
+import { Menu } from './Menu.js';
 
 /**
  * Spectrum Menu Item Component
@@ -88,24 +89,6 @@ export class MenuItem extends ActionButton {
         }
     }
 
-    public async connectedCallback(): Promise<void> {
-        super.connectedCallback();
-        // Slot updates happens after the connected callback,
-        // so we need to wait a frame before announcing ourselves
-        // or the right menu might not pick this up. E.g. without this
-        // the underlying menu in sp-menu-group won't see this.
-        await new Promise((ready) => requestAnimationFrame(ready));
-        const addedEvent = new CustomEvent('sp-menu-item-added', {
-            bubbles: true,
-            composed: true,
-            detail: {
-                item: this,
-                owned: false,
-            },
-        });
-        this.dispatchEvent(addedEvent);
-    }
-
     updateAriaSelected(): void {
         const role = this.getAttribute('role');
         if (role === 'option') {
@@ -130,6 +113,20 @@ export class MenuItem extends ActionButton {
         }
     }
 
+    public connectedCallback(): void {
+        super.connectedCallback();
+        const addedEvent = new CustomEvent('sp-menu-item-added', {
+            bubbles: true,
+            composed: true,
+            detail: {
+                item: this,
+                owned: false,
+                focusable: true,
+            },
+        });
+        this.dispatchEvent(addedEvent);
+    }
+
     public disconnectedCallback(): void {
         super.disconnectedCallback();
         const removedEvent = new CustomEvent('sp-menu-item-removed', {
@@ -142,6 +139,13 @@ export class MenuItem extends ActionButton {
         this.dispatchEvent(removedEvent);
     }
 
+    // protected itemInsertResolver!: Promise<unknown[]>;
+
+    protected async _getUpdateComplete(): Promise<void> {
+        await super._getUpdateComplete();
+        // await this.itemInsertResolver;
+    }
+
     public async triggerUpdate(): Promise<void> {
         await new Promise((ready) => requestAnimationFrame(ready));
         const updatedEvent = new CustomEvent('sp-menu-item-update', {
@@ -150,6 +154,7 @@ export class MenuItem extends ActionButton {
             detail: {
                 item: this,
                 owned: false,
+                focusable: true,
             },
         });
         this.dispatchEvent(updatedEvent);
@@ -159,6 +164,8 @@ export class MenuItem extends ActionButton {
 export interface MenuItemUpdateEvent {
     item: MenuItem;
     owned: boolean;
+    focusable: boolean;
+    focusRoot: Menu;
 }
 
 declare global {

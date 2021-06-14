@@ -83,7 +83,7 @@
         "test:visual:clean:baseline": "rimraf test/visual/screenshots-baseline",
         "test:visual:clean:current": "rimraf test/visual/screenshots-current",
         "test:watch": "yarn test:watch:focus unit",
-        "test:watch:focus": "run-p watch:css \"test:build -w\" \"test:start --watch --group {1}\" --",
+        "test:watch:focus": "yarn test:build && run-p build:watch watch:css \"test:build -w\" \"test:start --watch --group {1}\" --",
         "watch:css": "node ./tasks/watch-css.js"
     },
     "peerDependencies": {
@@ -139,6 +139,7 @@
         "common-tags": "^1.8.0",
         "css-loader": "^5.2.0",
         "cssnano": "^4.1.10",
+        "debounce": "^1.2.1",
         "deepmerge": "^4.0.0",
         "element-closest": "^3.0.1",
         "eslint": "^7.21.0",
