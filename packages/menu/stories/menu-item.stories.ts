@@ -38,6 +38,25 @@ export const noWrap = (): TemplateResult => {
     `;
 };
 
+export const endSlot = (): TemplateResult => {
+    return html`
+        <sp-menu style="width: 150px;" selectable>
+            <sp-menu-item>
+                Save
+                <kbd slot="end">⌘S</kbd>
+            </sp-menu-item>
+            <sp-menu-item selected>
+                Save As...
+                <kbd slot="end">⇧⌘S</kbd>
+            </sp-menu-item>
+            <sp-menu-item disabled>
+                Save All
+                <kbd slot="end">⌥⌘S</kbd>
+            </sp-menu-item>
+        </sp-menu>
+    `;
+};
+
 export const href = (): TemplateResult => {
     return html`
         <sp-menu style="width: 150px;">

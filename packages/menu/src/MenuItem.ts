@@ -65,6 +65,11 @@ export class MenuItem extends ActionButton {
 
     protected get buttonContent(): TemplateResult[] {
         const content = super.buttonContent;
+        content.push(
+            html`
+                <slot name="end"></slot>
+            `
+        );
         if (this.selected) {
             content.push(html`
                 <sp-icon-checkmark100
