@@ -1432,6 +1432,13 @@
   dependencies:
     "@babel/runtime" "^7.6.2"
 
+"@internationalized/number@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@internationalized/number/-/number-3.0.1.tgz#7bfafb892a1571361095161e515e9b50b996151f"
+  integrity sha512-m5D+J1SIdWxXE5vRo8SYfs+8288FCQkdF9ibh5Cqv03pFtE/vORqGapxuP7CoxaHj+DnwKCKmS5MXkH6VUAAOg==
+  dependencies:
+    "@babel/runtime" "^7.6.2"
+
 "@jest/types@^24.9.0":
   version "24.9.0"
   resolved "https://registry.yarnpkg.com/@jest/types/-/types-24.9.0.tgz#63cb26cb7500d069e5a389441a7c6ab5e909fc59"
